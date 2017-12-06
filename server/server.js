@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 var { mongoose } = require('./db/mongoose');
 var { Todo } = require('./models/todos');
 var { User } = require('./models/user');
+const port = process.env.PORT || 3000;
 
 
 var app = express();
@@ -57,8 +58,31 @@ app.get('/todos/:id', (req, res) => {
 
 });
 
-app.listen(3000, () => {
-  console.log("Started on port 3000");
+app.delete('/todos/:id', (req,res) => {
+  //get the id
+  var id = req.params.id;
+  //validate the id -> not valid return 404
+  if(!ObjectID.isValid(id)) {
+    return res.status(404).send();
+  }
+  //remove todo by id
+     Todo.findByIdAndRemove(id).then((doc) => {
+         if(!doc) {
+            //error
+        //400 with empty body
+        return  res.status(404).send();
+       }
+       //success
+      //if no doc send 404 else send doc with 200
+         
+        res.status(200).send(doc);
+     }).catch((e) => res.status(400).send())
+    
+    
+});
+
+app.listen(port, () => {
+  console.log(`Started on port ${port}`);
 });
 
 module.exports = { app };
